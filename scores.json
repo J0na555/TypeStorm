@@ -1,0 +1,16 @@
+[
+    {
+        "round": 1,
+        "level": "Beginner",
+        "wpm": 13.44,
+        "accuracy": 36.0,
+        "time": 19.64
+    },
+    {
+        "round": 2,
+        "level": "Beginner",
+        "wpm": 16.18,
+        "accuracy": 100.0,
+        "time": 23.73
+    }
+]

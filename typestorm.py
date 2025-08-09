@@ -1,7 +1,9 @@
 import time
 import random
+import json
 from rich.console import Console
 from rich.panel import Panel
+from rich.table import Table
 from pyfiglet import Figlet
 
 console = Console()
@@ -83,7 +85,7 @@ code_snippets_by_level = {
         # Advanced algorithms
         "def quicksort(arr):\n    if len(arr) <= 1:\n        return arr\n    pivot = arr[len(arr)//2]\n    left = [x for x in arr if x < pivot]\n    middle = [x for x in arr if x == pivot]\n    right = [x for x in arr if x > pivot]\n    return quicksort(left) + middle + quicksort(right)",
         
-        # Database operations
+        # Database operationsA
         "import sqlite3\nconn = sqlite3.connect('example.db')\nc = conn.cursor()\nc.execute('SELECT * FROM users')\nrows = c.fetchall()",
         "const { Pool } = require('pg');\nconst pool = new Pool();\nconst res = await pool.query('SELECT NOW()');",
     ],
@@ -161,9 +163,24 @@ def multi_line_input(prompt=""):
         lines.append(line)
     return "\n".join(lines)
 
-def play_round():
+def load_scores():
+    try:
+        with open('scores.json', 'r') as f:
+            return json.load(f)
+    except(FileNotFoundError, json.JSONDecodeError):
+        return []
+
+def save_scores(scores):
+    try:
+        with open('scores.json', 'w') as f:
+            json.dump(scores, f, indent=4)
+    except Exception as e:
+        console.print(f"[bold red]Error saving scores: {e}[/bold red]")
+
+
+
+def play_round(round_num, scores):
     display_name, key = choose_level()
-    # level = choose_level()
     snippet = get_random_code_snippet(key)
     console.print(Panel(snippet, title=f"Type this code  ({display_name.capitalize()}) ", style='bold cyan'))
 
@@ -175,15 +192,47 @@ def play_round():
     wpm, accuracy, time_taken = calculate_result(snippet, typed, start_time, end_time)
 
     console.print(f"\n[bold cyan]Results:[/bold cyan] wpm: {wpm}, Accuracy: {accuracy}% Time: {time_taken}s")
+ 
+    scores.append({
+        'round':round_num,
+        'level':display_name,
+        'wpm':wpm,
+        'accuracy':accuracy,
+        'time':time_taken
+    })
+    save_scores(scores)
 
+    if scores:
+        avg_wpm = sum(s['wpm'] for s in scores) / len(scores)
+        console.print(f"Average WPM so far: {round(avg_wpm, 2)}")
 
 if __name__ == "__main__":
     show_banner()
+    scores = load_scores()
+    round_num = max(s['round'] for s in scores)+1 if scores else 1
 
     while True:
-        play_round()
+        play_round(round_num, scores)
+        round_num += 1
         again = input('\nPlay again? (y/n) ').lower()
         if again != "y":
+            if scores:
+                table = Table(title="Game Summary")
+                table.add_column("Round")
+                table.add_column("Level")
+                table.add_column("WPM")
+                table.add_column("Accuracy")
+                table.add_column("Time(s)")
+                for s in scores:
+                    table.add_row(str(s['round']), 
+                                  s['level'], 
+                                  str(s['wpm']), 
+                                  f"{s['accuracy']}%", 
+                                  str(s['time']))
+                console.print(table)
+
+                high_wpm = max(scores, key=lambda x:x['wpm']) ['wpm'] if scores else 0
+                console.print(f"Highest wpm: {high_wpm}")
             console.print("Thanks for playing TyperStorm!", style= "bold magenta")
             break
 
