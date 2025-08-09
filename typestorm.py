@@ -4,6 +4,7 @@ import json
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+from rich.syntax import Syntax
 from pyfiglet import Figlet
 
 console = Console()
@@ -182,7 +183,9 @@ def save_scores(scores):
 def play_round(round_num, scores):
     display_name, key = choose_level()
     snippet = get_random_code_snippet(key)
-    console.print(Panel(snippet, title=f"Type this code  ({display_name.capitalize()}) ", style='bold cyan'))
+
+    syntax_snippet = Syntax(snippet, "python", theme="moonkai", line_numbers=True)
+    console.print(Panel(syntax_snippet, title=f"Type this code  ({display_name.capitalize()}) ", style='bold cyan'))
 
     console.print("\nStart typing and press Enter on empty line when done...", style= 'yellow')
     start_time= time.time()
