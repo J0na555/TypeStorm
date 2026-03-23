@@ -12,5 +12,82 @@
         "wpm": 14.51,
         "accuracy": 100.0,
         "time": 12.41
+    },
+    {
+        "round": 3,
+        "level": "Beginner",
+        "wpm": 7.94,
+        "accuracy": 100.0,
+        "time": 9.06
+    },
+    {
+        "round": 4,
+        "level": "Beginner",
+        "wpm": 13.1,
+        "accuracy": 56.25,
+        "time": 30.23
+    },
+    {
+        "round": 5,
+        "level": "Beginner",
+        "wpm": 10.11,
+        "accuracy": 13.33,
+        "time": 20.19
+    },
+    {
+        "round": 6,
+        "level": "Beginner",
+        "wpm": 11.26,
+        "accuracy": 27.27,
+        "time": 13.86
+    },
+    {
+        "round": 7,
+        "level": "Advanced",
+        "wpm": 17.38,
+        "accuracy": 12.59,
+        "time": 69.06
+    },
+    {
+        "round": 8,
+        "level": "Master",
+        "wpm": 13.17,
+        "accuracy": 18.18,
+        "time": 82.9
+    },
+    {
+        "round": 9,
+        "level": "Master",
+        "wpm": 18.5,
+        "accuracy": 99.3,
+        "time": 92.11
+    },
+    {
+        "round": 10,
+        "level": "Beginner",
+        "wpm": 18.71,
+        "accuracy": 43.75,
+        "time": 18.6
+    },
+    {
+        "round": 11,
+        "level": "Intermediate",
+        "wpm": 22.05,
+        "accuracy": 31.48,
+        "time": 29.94
+    },
+    {
+        "round": 12,
+        "level": "Advanced",
+        "wpm": 27.17,
+        "accuracy": 64.06,
+        "time": 26.94
+    },
+    {
+        "round": 13,
+        "level": "Advanced",
+        "wpm": 20.55,
+        "accuracy": 16.79,
+        "time": 65.98
     }
 ]

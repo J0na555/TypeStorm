@@ -1,162 +1,301 @@
-import time
-import random
+import argparse
 import json
+import random
+import time
+from pathlib import Path
+
+from pyfiglet import Figlet
 from rich.console import Console
 from rich.panel import Panel
-from rich.table import Table
 from rich.syntax import Syntax
-from pyfiglet import Figlet
+from rich.table import Table
 
 console = Console()
-f = Figlet(font='slant')
+f = Figlet(font="slant")
+SCORE_FILE = Path(__file__).with_name("scores.json")
+
+LEVEL_CHOICES = {
+    "1": ("Beginner", "beginner"),
+    "2": ("Intermediate", "intermediate"),
+    "3": ("Advanced", "advanced"),
+    "4": ("Expert", "expert"),
+    "5": ("Master", "master"),
+}
 
 code_snippets_by_level = {
     "beginner": [
-        # Basic variable assignments and prints
-        "print('Hello World')",
-        "x = 10",
-        "name = input('Enter your name: ')",
-        "const isRaining = true;",
-        "let counter = 0;",
-        "System.out.println(\"Java\");",
-        "# This is a comment",
-        
-        # Simple math operations
-        "sum = 5 + 3",
-        "product = 4 * 7",
-        "result = 10 % 3",
-        
-        # Basic conditionals
-        "if True:\n    print('Yes')",
-        "if age >= 18:\n    print('Adult')",
+        {"language": "python", "text": "print('Hello World')"},
+        {"language": "python", "text": "x = 10"},
+        {"language": "python", "text": "name = input('Enter your name: ')"},
+        {"language": "javascript", "text": "const isRaining = true;"},
+        {"language": "javascript", "text": "let counter = 0;"},
+        {"language": "java", "text": "System.out.println(\"Java\");"},
+        {"language": "python", "text": "# This is a comment"},
+        {"language": "python", "text": "sum = 5 + 3"},
+        {"language": "python", "text": "product = 4 * 7"},
+        {"language": "python", "text": "result = 10 % 3"},
+        {"language": "python", "text": "if True:\n    print('Yes')"},
+        {"language": "python", "text": "if age >= 18:\n    print('Adult')"},
     ],
-    
     "intermediate": [
-        # Loops and collections
-        "for i in range(1, 6):\n    print(i*i)",
-        "names = ['Alice', 'Bob']\nfor name in names:\n    print(name)",
-        "let nums = [1,2,3];\nnums.forEach(n => console.log(n));",
-        
-        # Functions
-        "def double(x):\n    return x * 2",
-        "const multiply = (a, b) => a * b;",
-        "function greet() {\n    return 'Hello';\n}",
-        
-        # Data structures
-        "student = {'name': 'John', 'age': 20}",
-        "numbers = {1, 2, 3}",
-        "tuple_colors = ('red', 'green', 'blue')",
-        
-        # String manipulation
-        "'hello'.upper()",
-        "name = 'Alice'\nmsg = f\"Hi {name}\"",
-        "const str = 'Hello';\nconsole.log(str.substring(1, 3));",
+        {"language": "python", "text": "for i in range(1, 6):\n    print(i*i)"},
+        {
+            "language": "python",
+            "text": "names = ['Alice', 'Bob']\nfor name in names:\n    print(name)",
+        },
+        {
+            "language": "javascript",
+            "text": "let nums = [1,2,3];\nnums.forEach(n => console.log(n));",
+        },
+        {"language": "python", "text": "def double(x):\n    return x * 2"},
+        {"language": "javascript", "text": "const multiply = (a, b) => a * b;"},
+        {"language": "javascript", "text": "function greet() {\n    return 'Hello';\n}"},
+        {"language": "python", "text": "student = {'name': 'John', 'age': 20}"},
+        {"language": "python", "text": "numbers = {1, 2, 3}"},
+        {"language": "python", "text": "tuple_colors = ('red', 'green', 'blue')"},
+        {"language": "python", "text": "'hello'.upper()"},
+        {"language": "python", "text": "name = 'Alice'\nmsg = f\"Hi {name}\""},
+        {
+            "language": "javascript",
+            "text": "const str = 'Hello';\nconsole.log(str.substring(1, 3));",
+        },
     ],
-    
     "advanced": [
-        # Classes and OOP
-        "class Circle:\n    def __init__(self, radius):\n        self.radius = radius\n    def area(self):\n        return 3.14 * self.radius**2",
-        "class Person {\n    constructor(name) {\n        this.name = name;\n    }\n    greet() {\n        console.log(`Hello ${this.name}`);\n    }\n}",
-        
-        # File I/O
-        "with open('data.txt') as f:\n    content = f.read()",
-        "import json\nwith open('data.json') as f:\n    data = json.load(f)",
-        
-        # Error handling
-        "try:\n    x = 1/0\nexcept ZeroDivisionError:\n    print('Cannot divide by zero')",
-        "try {\n    riskyOperation();\n} catch (e) {\n    console.error(e);\n}",
-        
-        # Decorators
-        "def my_decorator(func):\n    def wrapper():\n        print('Before')\n        func()\n        print('After')\n    return wrapper",
+        {
+            "language": "python",
+            "text": (
+                "class Circle:\n"
+                "    def __init__(self, radius):\n"
+                "        self.radius = radius\n"
+                "    def area(self):\n"
+                "        return 3.14 * self.radius**2"
+            ),
+        },
+        {
+            "language": "javascript",
+            "text": (
+                "class Person {\n"
+                "    constructor(name) {\n"
+                "        this.name = name;\n"
+                "    }\n"
+                "    greet() {\n"
+                "        console.log(`Hello ${this.name}`);\n"
+                "    }\n"
+                "}"
+            ),
+        },
+        {"language": "python", "text": "with open('data.txt') as f:\n    content = f.read()"},
+        {
+            "language": "python",
+            "text": "import json\nwith open('data.json') as f:\n    data = json.load(f)",
+        },
+        {
+            "language": "python",
+            "text": "try:\n    x = 1/0\nexcept ZeroDivisionError:\n    print('Cannot divide by zero')",
+        },
+        {
+            "language": "javascript",
+            "text": "try {\n    riskyOperation();\n} catch (e) {\n    console.error(e);\n}",
+        },
+        {
+            "language": "python",
+            "text": (
+                "def my_decorator(func):\n"
+                "    def wrapper():\n"
+                "        print('Before')\n"
+                "        func()\n"
+                "        print('After')\n"
+                "    return wrapper"
+            ),
+        },
     ],
-    
     "expert": [
-        # Generators and coroutines
-        "def count_up_to(n):\n    i = 1\n    while i <= n:\n        yield i\n        i += 1",
-        "async function fetchData() {\n    const response = await fetch('api/data');\n    return await response.json();\n}",
-        
-        # Metaprogramming
-        "class Meta(type):\n    def __new__(cls, name, bases, dct):\n        dct['version'] = 1.0\n        return super().__new__(cls, name, bases, dct)",
-        "const handler = {\n    get(target, prop) {\n        return `Property ${prop} doesn't exist`;\n    }\n};\nconst proxy = new Proxy({}, handler);",
-        
-        # Concurrency
-        "import threading\ndef worker():\n    print('Thread working')\nthread = threading.Thread(target=worker)\nthread.start()",
-        "const worker = new Worker('worker.js');\nworker.postMessage('start');",
-        
-        # Advanced algorithms
-        "def quicksort(arr):\n    if len(arr) <= 1:\n        return arr\n    pivot = arr[len(arr)//2]\n    left = [x for x in arr if x < pivot]\n    middle = [x for x in arr if x == pivot]\n    right = [x for x in arr if x > pivot]\n    return quicksort(left) + middle + quicksort(right)",
-        
-        # Database operationsA
-        "import sqlite3\nconn = sqlite3.connect('example.db')\nc = conn.cursor()\nc.execute('SELECT * FROM users')\nrows = c.fetchall()",
-        "const { Pool } = require('pg');\nconst pool = new Pool();\nconst res = await pool.query('SELECT NOW()');",
+        {
+            "language": "python",
+            "text": "def count_up_to(n):\n    i = 1\n    while i <= n:\n        yield i\n        i += 1",
+        },
+        {
+            "language": "javascript",
+            "text": (
+                "async function fetchData() {\n"
+                "    const response = await fetch('api/data');\n"
+                "    return await response.json();\n"
+                "}"
+            ),
+        },
+        {
+            "language": "python",
+            "text": (
+                "class Meta(type):\n"
+                "    def __new__(cls, name, bases, dct):\n"
+                "        dct['version'] = 1.0\n"
+                "        return super().__new__(cls, name, bases, dct)"
+            ),
+        },
+        {
+            "language": "javascript",
+            "text": (
+                "const handler = {\n"
+                "    get(target, prop) {\n"
+                "        return `Property ${prop} doesn't exist`;\n"
+                "    }\n"
+                "};\n"
+                "const proxy = new Proxy({}, handler);"
+            ),
+        },
+        {
+            "language": "python",
+            "text": (
+                "import threading\n"
+                "def worker():\n"
+                "    print('Thread working')\n"
+                "thread = threading.Thread(target=worker)\n"
+                "thread.start()"
+            ),
+        },
+        {"language": "javascript", "text": "const worker = new Worker('worker.js');\nworker.postMessage('start');"},
+        {
+            "language": "python",
+            "text": (
+                "def quicksort(arr):\n"
+                "    if len(arr) <= 1:\n"
+                "        return arr\n"
+                "    pivot = arr[len(arr)//2]\n"
+                "    left = [x for x in arr if x < pivot]\n"
+                "    middle = [x for x in arr if x == pivot]\n"
+                "    right = [x for x in arr if x > pivot]\n"
+                "    return quicksort(left) + middle + quicksort(right)"
+            ),
+        },
+        {
+            "language": "python",
+            "text": (
+                "import sqlite3\n"
+                "conn = sqlite3.connect('example.db')\n"
+                "c = conn.cursor()\n"
+                "c.execute('SELECT * FROM users')\n"
+                "rows = c.fetchall()"
+            ),
+        },
+        {
+            "language": "javascript",
+            "text": "const { Pool } = require('pg');\nconst pool = new Pool();\nconst res = await pool.query('SELECT NOW()');",
+        },
     ],
-    
     "master": [
-        # Machine learning
-        "from sklearn.ensemble import RandomForestClassifier\nclf = RandomForestClassifier()\nclf.fit(X_train, y_train)\npredictions = clf.predict(X_test)",
-        
-        # Web frameworks
-        "@app.route('/user/<username>')\ndef show_user(username):\n    return f'User {username}'",
-        "const express = require('express');\nconst app = express();\napp.get('/', (req, res) => res.send('Hello'));",
-        
-        # System programming
-        "import os\npid = os.fork()\nif pid == 0:\n    print('Child process')\nelse:\n    print('Parent process')",
-        
-        # Cryptography
-        "from cryptography.fernet import Fernet\nkey = Fernet.generate_key()\ncipher = Fernet(key)\ntoken = cipher.encrypt(b'secret')",
-        
-        # Game development
-        "def update(self):\n    self.velocity += self.acceleration\n    self.position += self.velocity\n    if self.position.y > SCREEN_HEIGHT:\n        self.position.y = 0",
-        
-        # Compiler/parser
-        "import ast\ntree = ast.parse('x = 1 + 2')\nfor node in ast.walk(tree):\n    print(type(node).__name__)",
-        
-        # Blockchain
-        "class Block:\n    def __init__(self, index, timestamp, data, previous_hash):\n        self.index = index\n        self.timestamp = timestamp\n        self.data = data\n        self.previous_hash = previous_hash\n        self.hash = self.calculate_hash()",
-    ]
+        {
+            "language": "python",
+            "text": (
+                "from sklearn.ensemble import RandomForestClassifier\n"
+                "clf = RandomForestClassifier()\n"
+                "clf.fit(X_train, y_train)\n"
+                "predictions = clf.predict(X_test)"
+            ),
+        },
+        {
+            "language": "python",
+            "text": "@app.route('/user/<username>')\ndef show_user(username):\n    return f'User {username}'",
+        },
+        {
+            "language": "javascript",
+            "text": "const express = require('express');\nconst app = express();\napp.get('/', (req, res) => res.send('Hello'));",
+        },
+        {
+            "language": "python",
+            "text": (
+                "import os\n"
+                "pid = os.fork()\n"
+                "if pid == 0:\n"
+                "    print('Child process')\n"
+                "else:\n"
+                "    print('Parent process')"
+            ),
+        },
+        {
+            "language": "python",
+            "text": (
+                "from cryptography.fernet import Fernet\n"
+                "key = Fernet.generate_key()\n"
+                "cipher = Fernet(key)\n"
+                "token = cipher.encrypt(b'secret')"
+            ),
+        },
+        {
+            "language": "python",
+            "text": (
+                "def update(self):\n"
+                "    self.velocity += self.acceleration\n"
+                "    self.position += self.velocity\n"
+                "    if self.position.y > SCREEN_HEIGHT:\n"
+                "        self.position.y = 0"
+            ),
+        },
+        {
+            "language": "python",
+            "text": "import ast\ntree = ast.parse('x = 1 + 2')\nfor node in ast.walk(tree):\n    print(type(node).__name__)",
+        },
+        {
+            "language": "python",
+            "text": (
+                "class Block:\n"
+                "    def __init__(self, index, timestamp, data, previous_hash):\n"
+                "        self.index = index\n"
+                "        self.timestamp = timestamp\n"
+                "        self.data = data\n"
+                "        self.previous_hash = previous_hash\n"
+                "        self.hash = self.calculate_hash()"
+            ),
+        },
+    ],
 }
 
+
 def show_banner():
-    console.print(f.renderText('TypeStorm'), style= 'bold cyan')
+    console.print(f.renderText("TypeStorm"), style="bold cyan")
+
 
 def get_random_code_snippet(level):
-    if level  not in code_snippets_by_level:
-        raise ValueError("Invalid Level!")
+    if level not in code_snippets_by_level:
+        raise ValueError("Invalid level!")
     return random.choice(code_snippets_by_level[level])
 
-def choose_level():
+
+def choose_level(forced_level_key=None):
+    if forced_level_key:
+        for _, value in LEVEL_CHOICES.items():
+            if value[1] == forced_level_key:
+                return value
+        raise ValueError("Invalid forced level.")
+
     console.print("\n[bold]Choose Difficulty Level: [bold cyan]")
-    console.print("1.Beginner")
-    console.print("2.Intermediate")
-    console.print("3.Advanced")
-    console.print("4.Expert")
-    console.print("5.Master")
+    console.print("1. Beginner")
+    console.print("2. Intermediate")
+    console.print("3. Advanced")
+    console.print("4. Expert")
+    console.print("5. Master")
 
     while True:
         choice = input("Enter 1,2,3,4,5: ").strip()
-        if choice in ("1", "2", "3", "4", "5"):
-            return {
-                "1":("Beginner", "beginner"),
-                "2":("Intermediate", "intermediate"),
-                "3":("Advanced", "advanced"),
-                "4":("Expert", "expert"),
-                "5":("Master", "master")
-            }[choice]
-        console.print("Invalid Choice! Please Try Again", style="bold red")
-        
+        if choice in LEVEL_CHOICES:
+            return LEVEL_CHOICES[choice]
+        console.print("Invalid choice! Please try again.", style="bold red")
+
+
 def calculate_result(snippet, typed, start_time, end_time):
     time_taken = end_time - start_time
-    correct_chars = sum(1 for i,c in enumerate(typed) if i < len(snippet) and snippet[i] == c)
-    accuracy = (correct_chars / len(snippet)) * 100
-    wpm = (len(typed) / 5) / (time_taken/ 60) if time_taken > 0 else 0
-    return round(wpm, 2), round (accuracy, 2), round(time_taken, 2)
+    matched = sum(1 for idx, char in enumerate(typed) if idx < len(snippet) and snippet[idx] == char)
+    total_chars = max(len(snippet), len(typed), 1)
+    accuracy = (matched / total_chars) * 100
+    wpm = (len(typed) / 5) / (time_taken / 60) if time_taken > 0 else 0
+    return round(wpm, 2), round(accuracy, 2), round(time_taken, 2)
+
 
 def multi_line_input(prompt=""):
-    console.print(prompt, style='yellow')
+    console.print(prompt, style="yellow")
     lines = []
     while True:
         try:
-            line=input()
+            line = input()
         except EOFError:
             break
         if line == "":
@@ -164,78 +303,168 @@ def multi_line_input(prompt=""):
         lines.append(line)
     return "\n".join(lines)
 
-def load_scores():
+
+def load_scores(path=SCORE_FILE):
     try:
-        with open('scores.json', 'r') as f:
-            return json.load(f)
-    except(FileNotFoundError, json.JSONDecodeError):
+        with path.open("r", encoding="utf-8") as file:
+            data = json.load(file)
+            return data if isinstance(data, list) else []
+    except (FileNotFoundError, json.JSONDecodeError):
         return []
 
-def save_scores(scores):
+
+def save_scores(scores, path=SCORE_FILE):
     try:
-        with open('scores.json', 'w') as f:
-            json.dump(scores, f, indent=4)
-    except Exception as e:
-        console.print(f"[bold red]Error saving scores: {e}[/bold red]")
+        with path.open("w", encoding="utf-8") as file:
+            json.dump(scores, file, indent=4)
+    except OSError as error:
+        console.print(f"[bold red]Error saving scores: {error}[/bold red]")
 
 
+def mismatch_feedback(snippet, typed):
+    for idx, expected in enumerate(snippet):
+        if idx >= len(typed):
+            return f"Mismatch at index {idx}: missing {expected!r}."
+        actual = typed[idx]
+        if actual != expected:
+            return f"Mismatch at index {idx}: expected {expected!r}, got {actual!r}."
+    if len(typed) > len(snippet):
+        extra = typed[len(snippet)]
+        return f"Extra input at index {len(snippet)}: got {extra!r}."
+    return "Perfect match."
 
-def play_round(round_num, scores):
-    display_name, key = choose_level()
-    snippet = get_random_code_snippet(key)
 
-    syntax_snippet = Syntax(snippet, "python", theme="moonkai", line_numbers=True)
-    console.print(Panel(syntax_snippet, title=f"Type this code  ({display_name.capitalize()}) ", style='bold cyan'))
+def print_best_scores(scores):
+    if not scores:
+        return
+    grouped = {}
+    for score in scores:
+        grouped.setdefault(score["level"], []).append(score)
 
-    console.print("\nStart typing and press Enter on empty line when done...", style= 'yellow')
-    start_time= time.time()
-    typed= multi_line_input()
-    end_time= time.time()
+    table = Table(title="Best Scores by Level")
+    table.add_column("Level")
+    table.add_column("Best WPM")
+    table.add_column("Best Accuracy")
+
+    for level in sorted(grouped):
+        level_scores = grouped[level]
+        best_wpm = max(level_scores, key=lambda item: item["wpm"])["wpm"]
+        best_accuracy = max(level_scores, key=lambda item: item["accuracy"])["accuracy"]
+        table.add_row(level, str(best_wpm), f"{best_accuracy}%")
+    console.print(table)
+
+
+def play_round(round_num, scores, forced_level_key=None):
+    display_name, key = choose_level(forced_level_key)
+    snippet_data = get_random_code_snippet(key)
+    snippet = snippet_data["text"]
+    language = snippet_data["language"]
+
+    syntax_snippet = Syntax(snippet, language, theme="monokai", line_numbers=True)
+    console.print(Panel(syntax_snippet, title=f"Type this code ({display_name})", style="bold cyan"))
+
+    console.print("\nStart typing and press Enter on empty line when done...", style="yellow")
+    start_time = time.time()
+    typed = multi_line_input()
+    end_time = time.time()
 
     wpm, accuracy, time_taken = calculate_result(snippet, typed, start_time, end_time)
+    console.print(f"\n[bold cyan]Results:[/bold cyan] WPM: {wpm}, Accuracy: {accuracy}% Time: {time_taken}s")
+    console.print(f"[bold yellow]Feedback:[/bold yellow] {mismatch_feedback(snippet, typed)}")
 
-    console.print(f"\n[bold cyan]Results:[/bold cyan] wpm: {wpm}, Accuracy: {accuracy}% Time: {time_taken}s")
- 
-    scores.append({
-        'round':round_num,
-        'level':display_name,
-        'wpm':wpm,
-        'accuracy':accuracy,
-        'time':time_taken
-    })
+    scores.append(
+        {
+            "round": round_num,
+            "level": display_name,
+            "wpm": wpm,
+            "accuracy": accuracy,
+            "time": time_taken,
+        }
+    )
     save_scores(scores)
 
-    if scores:
-        avg_wpm = sum(s['wpm'] for s in scores) / len(scores)
-        console.print(f"Average WPM so far: {round(avg_wpm, 2)}")
+    avg_wpm = sum(score["wpm"] for score in scores) / len(scores)
+    console.print(f"Average WPM so far: {round(avg_wpm, 2)}")
 
-if __name__ == "__main__":
+
+def print_summary(scores):
+    if not scores:
+        console.print("No scores recorded yet.")
+        return
+
+    table = Table(title="Game Summary")
+    table.add_column("Round")
+    table.add_column("Level")
+    table.add_column("WPM")
+    table.add_column("Accuracy")
+    table.add_column("Time(s)")
+    for score in scores:
+        table.add_row(
+            str(score["round"]),
+            score["level"],
+            str(score["wpm"]),
+            f"{score['accuracy']}%",
+            str(score["time"]),
+        )
+    console.print(table)
+
+    high_wpm = max(scores, key=lambda item: item["wpm"])["wpm"]
+    console.print(f"Highest WPM: {high_wpm}")
+    print_best_scores(scores)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Play TypeStorm in your terminal.")
+    parser.add_argument(
+        "--level",
+        choices=[value[1] for value in LEVEL_CHOICES.values()],
+        help="Play with a fixed level each round.",
+    )
+    parser.add_argument(
+        "--rounds",
+        type=int,
+        default=None,
+        help="Number of rounds to play before exiting automatically.",
+    )
+    parser.add_argument(
+        "--reset-scores",
+        action="store_true",
+        help="Clear existing scores before starting.",
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    if args.rounds is not None and args.rounds < 1:
+        raise ValueError("--rounds must be at least 1.")
+
+    if args.reset_scores and SCORE_FILE.exists():
+        SCORE_FILE.unlink()
+
     show_banner()
     scores = load_scores()
-    round_num = max(s['round'] for s in scores)+1 if scores else 1
+    round_num = max(score["round"] for score in scores) + 1 if scores else 1
 
+    played = 0
     while True:
-        play_round(round_num, scores)
+        play_round(round_num, scores, forced_level_key=args.level)
         round_num += 1
-        again = input('\nPlay again? (y/n) ').lower()
-        if again != "y":
-            if scores:
-                table = Table(title="Game Summary")
-                table.add_column("Round")
-                table.add_column("Level")
-                table.add_column("WPM")
-                table.add_column("Accuracy")
-                table.add_column("Time(s)")
-                for s in scores:
-                    table.add_row(str(s['round']), 
-                                  s['level'], 
-                                  str(s['wpm']), 
-                                  f"{s['accuracy']}%", 
-                                  str(s['time']))
-                console.print(table)
+        played += 1
 
-                high_wpm = max(scores, key=lambda x:x['wpm']) ['wpm'] if scores else 0
-                console.print(f"Highest wpm: {high_wpm}")
-            console.print("Thanks for playing TyperStorm!", style= "bold magenta")
+        if args.rounds is not None:
+            if played >= args.rounds:
+                break
+            continue
+
+        again = input("\nPlay again? (y/n) ").strip().lower()
+        if again != "y":
             break
+
+    print_summary(scores)
+    console.print("Thanks for playing TypeStorm!", style="bold magenta")
+
+
+if __name__ == "__main__":
+    main()
 
